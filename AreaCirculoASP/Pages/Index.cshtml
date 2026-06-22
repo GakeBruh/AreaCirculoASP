@@ -1,0 +1,24 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Área de un círculo";
+}
+
+<h1>Calcular área de un círculo</h1>
+
+<form method="post">
+    <label>Ingrese el radio:</label>
+    <br />
+
+    <input type="number" step="any" name="Radio" />
+    <br /><br />
+
+    <button type="submit">Calcular área</button>
+</form>
+
+<br />
+
+@if (Model.Resultado != null)
+{
+    <h3>@Model.Resultado</h3>
+}
