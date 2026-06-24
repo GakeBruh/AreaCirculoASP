@@ -4,21 +4,131 @@
     ViewData["Title"] = "Área de un círculo";
 }
 
-<h1>Calcular área de un círculo</h1>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
 
-<form method="post">
-    <label>Ingrese el radio:</label>
-    <br />
+<div class="calc-page">
+    <h1 class="calc-heading">Calcular área de un círculo</h1>
 
-    <input type="number" step="any" name="Radio" />
-    <br /><br />
+    <div class="calc-grid">
 
-    <button type="submit">Calcular área</button>
-</form>
+        <div class="panel">
+            <p class="panel-title">Parámetros</p>
 
-<br />
+            <form method="post">
+                <div class="form-group">
+                    <label for="radioInput">Radio (r)</label>
+                    <input type="number"
+                           step="any"
+                           name="Radio"
+                           id="radioInput"
+                           value="@(Model.Radio > 0 ? Model.Radio.ToString() : "")"
+                           min="0.01"
+                           placeholder="Ej: 5"
+                           oninput="previewCircle(this.value)" />
+                </div>
+                <button type="submit" class="btn-calc">Calcular área</button>
+            </form>
 
-@if (Model.Resultado != null)
-{
-    <h3>@Model.Resultado</h3>
-}
+            @if (Model.Resultado != null)
+            {
+                <div class="result-block">
+                    @if (Model.Radio > 0)
+                    {
+                        <p class="result-label">Área del círculo</p>
+                        <div class="result-val">@Model.AreaFormateada</div>
+                        <div class="formula">π × @Model.Radio² = @Model.AreaFormateada</div>
+
+                        <div class="stat-row">
+                            <div class="stat">
+                                <div class="stat-l">Circunferencia</div>
+                                <div class="stat-v">@Model.Circunferencia</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-l">Diámetro</div>
+                                <div class="stat-v">@Model.Diametro</div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="error-msg">@Model.Resultado</div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="panel panel-visual">
+            <p class="panel-title">Visualización</p>
+
+            <svg id="circuloSvg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#888" stroke-width="0.3" opacity="0.2"/>
+                    </pattern>
+                </defs>
+
+                <rect width="200" height="200" fill="url(#grid)"/>
+                <line x1="0" y1="100" x2="200" y2="100" stroke="#888" stroke-width="0.5" opacity="0.3"/>
+                <line x1="100" y1="0" x2="100" y2="200" stroke="#888" stroke-width="0.5" opacity="0.3"/>
+
+                <circle id="svgCirculo"
+                        cx="100" cy="100"
+                        r="@Model.RadioSvg.ToString("0.##")"
+                        fill="rgba(55,138,221,0.13)"
+                        stroke="#378ADD"
+                        stroke-width="2"
+                        style="transition: r 0.35s cubic-bezier(.4,0,.2,1);"/>
+
+                <line id="svgRadioLine"
+                      x1="100" y1="100"
+                      x2="@Model.RadioLineX2.ToString("0.##")" y2="100"
+                      stroke="#D4537E"
+                      stroke-width="1.5"
+                      stroke-dasharray="4,3"
+                      style="transition: x2 0.35s cubic-bezier(.4,0,.2,1);"/>
+
+                <circle cx="100" cy="100" r="3" fill="#D4537E"/>
+
+                <text id="svgRadioLabel"
+                      x="@Model.RadioLabelX.ToString("0.##")" y="95"
+                      font-size="11"
+                      fill="#D4537E"
+                      font-family="Inter,sans-serif"
+                      font-weight="500">r = @(Model.Radio > 0 ? Model.Radio.ToString() : "0")</text>
+            </svg>
+
+            <div class="legend">
+                <span class="legend-item">
+                    <svg width="16" height="8"><rect x="0" y="3" width="16" height="2" fill="#378ADD" rx="1"/></svg>
+                    Círculo
+                </span>
+                <span class="legend-item">
+                    <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#D4537E" stroke-width="1.5" stroke-dasharray="4,3"/></svg>
+                    Radio
+                </span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function previewCircle(val) {
+        var r = parseFloat(val);
+        if (!r || r <= 0) return;
+        var maxDisp = 90, cx = 100;
+        var svgR = Math.min((r / 20) * maxDisp, maxDisp);
+        document.getElementById('svgCirculo').setAttribute('r', svgR);
+        document.getElementById('svgRadioLine').setAttribute('x2', cx + svgR);
+        document.getElementById('svgRadioLabel').setAttribute('x', cx + svgR * 0.45);
+        document.getElementById('svgRadioLabel').textContent = 'r = ' + r;
+    }
+
+    // Si ya hay un valor del POST, actualizar el SVG al cargar
+    window.addEventListener('DOMContentLoaded', function () {
+        var input = document.getElementById('radioInput');
+        if (input && input.value) {
+            previewCircle(input.value);
+        }
+    });
+</script>
